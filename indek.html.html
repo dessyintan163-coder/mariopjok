@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ROEMAH EDU LAB - MARIO MATH ADVENTURE (PJOK Kelas 4)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .font-game {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom Pixelated / Playful Canvas Styling */
+        canvas {
+            background: linear-gradient(to bottom, #70c5ce 0%, #a4e2ec 60%, #e0f6fb 100%);
+            display: block;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        /* Custom Scrollbar for Teacher Dashboard */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4F46E5;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col justify-between p-2 md:p-4 overflow-x-hidden">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="max-w-4xl w-full mx-auto bg-amber-400 border-b-4 border-amber-600 rounded-2xl p-3 mb-2 shadow-lg flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="bg-red-500 text-white p-2.5 rounded-xl border-2 border-white shadow-inner flex items-center justify-center">
+                <i class="fa-solid fa-running text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="font-game text-xl sm:text-2xl text-red-700 tracking-wide drop-shadow-sm">ROEMAH EDU LAB</h1>
+                <p class="text-xs sm:text-sm font-bold text-amber-900">Riko: Petualang Cerdas PJOK Kelas 4</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button id="btnTeacherMode" onclick="openTeacherModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition transform active:scale-95 flex items-center gap-1.5 border-b-2 border-indigo-900">
+                <i class="fa-solid fa-chalkboard-user text-base"></i>
+                <span class="hidden sm:inline">Dashboard Guru</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CONTAINER -->
+    <main class="max-w-4xl w-full mx-auto relative flex-grow flex flex-col items-center justify-center">
+        
+        <!-- TOP HUD STATS -->
+        <div class="w-full bg-slate-800 text-white border-2 border-slate-700 rounded-xl p-2.5 mb-2 flex justify-around items-center text-sm sm:text-base font-game shadow-md">
+            <div class="flex items-center space-x-2 text-yellow-400">
+                <i class="fa-solid fa-coins text-lg"></i>
+                <span>KOIN: <span id="hudCoins" class="text-white">0</span></span>
+            </div>
+            <div class="flex items-center space-x-2 text-red-400">
+                <i class="fa-solid fa-heart text-lg"></i>
+                <span>NYAWA: <span id="hudLives" class="text-white">3</span></span>
+            </div>
+            <div class="flex items-center space-x-2 text-emerald-400">
+                <i class="fa-solid fa-star text-lg"></i>
+                <span>SKOR: <span id="hudScore" class="text-white">0</span></span>
+            </div>
+            <div class="flex items-center space-x-2 text-sky-400">
+                <i class="fa-solid fa-flag text-lg"></i>
+                <span>LEVEL: <span id="hudLevel" class="text-white">1</span></span>
+            </div>
+        </div>
+
+        <!-- CANVAS GAME BOARD -->
+        <div class="relative w-full aspect-[16/9] max-h-[70vh] flex justify-center items-center">
+            <canvas id="gameCanvas" width="800" height="450" class="w-full h-full object-contain bg-sky-200"></canvas>
+
+            <!-- START / OVERLAY SCREEN -->
+            <div id="gameOverlay" class="absolute inset-0 bg-slate-900/85 backdrop-blur-sm rounded-1rem flex flex-col items-center justify-center p-6 text-center z-10">
+                <div class="bg-amber-400 border-4 border-amber-600 p-6 rounded-3xl shadow-2xl max-w-md w-full animate-bounce-short">
+                    <h2 id="overlayTitle" class="font-game text-3xl text-red-700 mb-2">MARIO MATH ADVENTURE</h2>
+                    <p class="font-bold text-amber-950 text-sm mb-4">Petualangan Gerak Lokomotor & Permainan Tradisional PJOK Kelas 4</p>
+                    <div class="bg-amber-100 p-3 rounded-xl mb-4 text-left text-xs sm:text-sm text-slate-700 space-y-1">
+                        <p><i class="fa-solid fa-person-running text-red-500 mr-1"></i> <strong>A/D / Panah:</strong> Jalan Kiri / Kanan</p>
+                        <p><i class="fa-solid fa-arrow-up text-blue-500 mr-1"></i> <strong>W / Spasi:</strong> Melompat</p>
+                        <p><i class="fa-solid fa-circle-question text-amber-600 mr-1"></i> Sundul <strong>[?]</strong> untuk menjawab soal PJOK!</p>
+                    </div>
+                    <button id="btnStartGame" onclick="startGame()" class="w-full bg-emerald-500 hover:bg-emerald-600 border-b-4 border-emerald-800 text-white font-game text-xl py-3 rounded-2xl shadow-lg transition transform active:scale-95">
+                        <i class="fa-solid fa-play mr-2"></i> MULAI BERMAIN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOBILE CONTROLS -->
+        <div class="w-full mt-3 flex justify-between items-center sm:hidden px-2">
+            <div class="flex space-x-2">
+                <button id="btnTouchLeft" class="bg-slate-700 active:bg-slate-500 text-white w-14 h-14 rounded-2xl text-2xl font-bold flex items-center justify-center border-b-4 border-slate-900 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button id="btnTouchRight" class="bg-slate-700 active:bg-slate-500 text-white w-14 h-14 rounded-2xl text-2xl font-bold flex items-center justify-center border-b-4 border-slate-900 shadow-md">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+            <button id="btnTouchJump" class="bg-red-500 active:bg-red-700 text-white w-16 h-14 rounded-2xl text-2xl font-bold flex items-center justify-center border-b-4 border-red-900 shadow-md">
+                <i class="fa-solid fa-arrow-up"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- QUESTION MODAL -->
+    <div id="questionModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="bg-white border-4 border-amber-400 rounded-3xl p-6 max-w-lg w-full shadow-2xl relative animate-scale-up">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-slate-100 pb-2">
+                <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold font-game uppercase">
+                    <i class="fa-solid fa-futbol mr-1"></i> Soal PJOK Kelas 4
+                </span>
+                <span class="text-xs text-slate-400 font-bold">ROEMAH EDU LAB</span>
+            </div>
+            <h3 id="modalQuestionText" class="font-bold text-slate-800 text-base sm:text-lg mb-4 leading-relaxed">
+                Pertanyaan PJOK akan muncul di sini?
+            </h3>
+            <div id="modalOptions" class="space-y-2.5 mb-4">
+                <!-- Options will be generated dynamically -->
+            </div>
+            <!-- Feedback section -->
+            <div id="modalFeedback" class="hidden p-3 rounded-xl text-xs sm:text-sm font-bold"></div>
+        </div>
+    </div>
+
+    <!-- TEACHER DASHBOARD MODAL -->
+    <div id="teacherModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-50 border-4 border-indigo-500 rounded-3xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+            <!-- Header -->
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                        <i class="fa-solid fa-sliders text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-game text-xl text-indigo-900">Dashboard Guru PJOK</h2>
+                        <p class="text-xs text-slate-500 font-bold">Kelola Soal & AI Generator Soal PJOK</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="overflow-y-auto my-4 space-y-5 pr-1 flex-grow">
+                <!-- AI Generator Section -->
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-4 text-white shadow-md">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-yellow-300 text-lg"></i>
+                        <h3 class="font-game text-base">AI Generator Soal (Gemini 3.0 Flash)</h3>
+                    </div>
+                    <p class="text-xs text-indigo-100 mb-3">Buat set soal PJOK Kelas 4 secara otomatis menggunakan AI Gemini.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-200 uppercase mb-1">Mata Pelajaran</label>
+                            <input type="text" id="aiSubject" value="PJOK" class="w-full bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-200 uppercase mb-1">Kelas / Tingkat</label>
+                            <input type="text" id="aiGrade" value="Kelas 4" class="w-full bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-200 uppercase mb-1">Jumlah Soal</label>
+                            <input type="number" id="aiCount" value="5" min="3" max="10" class="w-full bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="block text-[10px] font-bold text-indigo-200 uppercase mb-1">Topik / Materi Soal</label>
+                        <input type="text" id="aiTopic" value="Permainan Tradisional (Gerak Lokomotor, Non-Lokomotor, Manipulatif)" class="w-full bg-white/10 border border-white/20 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-yellow-300">
+                    </div>
+
+                    <button id="btnGenerateAI" onclick="generateQuestionsAI()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-indigo-950 font-bold text-xs py-2.5 rounded-xl shadow transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Buat Soal Otomatis Dengan AI</span>
+                    </button>
+                </div>
+
+                <!-- Manual Add Question Section -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-indigo-600"></i> Tambah Soal Manual
+                    </h3>
+                    <div class="space-y-2.5 text-xs">
+                        <input type="text" id="manualQuestion" placeholder="Tuliskan pertanyaan PJOK..." class="w-full border rounded-xl p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="manualOptA" placeholder="Pilihan A" class="border rounded-xl p-2 outline-none">
+                            <input type="text" id="manualOptB" placeholder="Pilihan B" class="border rounded-xl p-2 outline-none">
+                            <input type="text" id="manualOptC" placeholder="Pilihan C" class="border rounded-xl p-2 outline-none">
+                            <input type="text" id="manualOptD" placeholder="Pilihan D" class="border rounded-xl p-2 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Kunci Jawaban</label>
+                                <select id="manualCorrect" class="w-full border rounded-xl p-2 bg-slate-50 outline-none font-bold text-indigo-600">
+                                    <option value="0">A</option>
+                                    <option value="1">B</option>
+                                    <option value="2">C</option>
+                                    <option value="3">D</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Penjelasan Singkat</label>
+                                <input type="text" id="manualExplanation" placeholder="Penjelasan jawaban..." class="w-full border rounded-xl p-2 outline-none">
+                            </div>
+                        </div>
+                        <button onclick="addManualQuestion()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl transition">
+                            Tambah Ke Bank Soal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Question Bank List -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-indigo-600"></i> Bank Soal Aktif (<span id="questionCount">0</span>)
+                        </h3>
+                        <button onclick="resetDefaultQuestions()" class="text-xs text-red-500 hover:text-red-700 font-bold underline">
+                            Reset Soal Default PJOK
+                        </button>
+                    </div>
+                    <div id="questionList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- Questions list rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-2 border-t border-slate-200 flex justify-end">
+                <button onclick="closeTeacherModal()" class="bg-indigo-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition">
+                    Selesai & Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        /* ==========================================================================
+           1. DEFAULT PJOK KELAS 4 QUESTIONS & QUESTION BANK MANAGEMENT
+           ========================================================================== */
+        const DEFAULT_PJOK_QUESTIONS = [
+            {
+                q: "Pada permainan Gobak Sodor, gerakan berlari mengejar lawan atau menghindari penjaga merupakan contoh gerak...",
+                options: ["A. Lokomotor", "B. Non-lokomotor", "C. Manipulatif", "D. Diam di tempat"],
+                correct: 0,
+                explanation: "Gerak lokomotor adalah gerakan berpindah tempat, seperti berlari dan melompat."
+            },
+            {
+                q: "Dalam permainan engklek, gerakan melompat dengan satu kaki melewati petak-petak garis termasuk gerakan...",
+                options: ["A. Lokomotor", "B. Manipulatif", "C. Halus", "D. Pasif"],
+                correct: 0,
+                explanation: "Melompat satu kaki berpindah dari petak ke petak lain merupakan contoh gerak lokomotor."
+            },
+            {
+                q: "Saat bermain bentengan, gerakan berdiri di dekat tiang benteng tanpa berpindah tempat untuk menjaga benteng adalah contoh gerak...",
+                options: ["A. Non-lokomotor", "B. Lokomotor", "C. Manipulatif", "D. Otomatis"],
+                correct: 0,
+                explanation: "Gerak non-lokomotor adalah gerakan yang dilakukan tanpa berpindah tempat, seperti berdiri atau mengayun."
+            },
+            {
+                q: "Pada permainan egrang bambu, gerakan menyeimbangkan badan saat menaiki bilah bambu sebelum berjalan adalah gerak...",
+                options: ["A. Lokomotor", "B. Non-lokomotor", "C. Refleks", "D. Manipulatif"],
+                correct: 1,
+                explanation: "Menjaga keseimbangan di tempat tanpa berpindah posisi tubuh tergolong gerak non-lokomotor."
+            },
+            {
+                q: "Dalam permainan lari balap karung, memegang ujung karung erat-erat agar tidak melorot merupakan contoh gerak...",
+                options: ["A. Manipulatif", "B. Lokomotor", "C. Non-lokomotor", "D. Otomatis"],
+                correct: 0,
+                explanation: "Gerak manipulatif melibatkan penguasaan atau tindakan terhadap suatu objek/benda (karung)."
+            },
+            {
+                q: "Berikut ini yang BUKAN merupakan contoh gerak lokomotor dalam permainan tradisional adalah...",
+                options: ["A. Berlari dalam bentengan", "B. Meloncat dalam engklek", "C. Mendorong lawan di tempat", "D. Berjalan di atas egrang"],
+                correct: 2,
+                explanation: "Mendorong lawan di tempat tidak membuat tubuh berpindah lokasi, sehingga merupakan non-lokomotor."
+            },
+            {
+                q: "Pada permainan kasti, gerakan melemparkan bola kasti ke arah pemukul termasuk ke dalam gerak...",
+                options: ["A. Lokomotor", "B. Manipulatif", "C. Non-lokomotor", "D. Statis"],
+                correct: 1,
+                explanation: "Melempar bola adalah gerak manipulatif karena melibatkan manipulation/penggunaan alat."
+            },
+            {
+                q: "Mengayunkan lengan saat siap berlari mengejar benteng lawan tanpa melangkah tergolong gerak...",
+                options: ["A. Lokomotor", "B. Non-lokomotor", "C. Manipulatif", "D. Kombinasi"],
+                correct: 1,
+                explanation: "Mengayunkan tangan/lengan di posisi tetap adalah gerakan non-lokomotor."
+            },
+            {
+                q: "Gerakan meloncat bersama karung menuju garis finish pada perlombaan lari karung adalah gerak...",
+                options: ["A. Lokomotor", "B. Non-lokomotor", "C. Pasif", "D. Relaksasi"],
+                correct: 0,
+                explanation: "Meloncat dari garis start menuju finish berpindah posisi tubuh, sehingga tergolong gerak lokomotor."
+            },
+            {
+                q: "Salah satu manfaat utama melakukan gerak lokomotor seperti berlari dan melompat dalam permainan tradisional adalah...",
+                options: ["A. Melatih kekuatan kaki dan kelincahan", "B. Membuat badan cepat lelah tanpa hasil", "C. Merusak koordinasi mata", "D. Mengurangi ketangkasan"],
+                correct: 0,
+                explanation: "Berlari dan melompat secara teratur melatih otot kaki, keseimbangan, serta kelincahan tubuh."
+            }
+        ];
+
+        let questionBank = [];
+
+        function loadQuestionBank() {
+            const saved = localStorage.getItem('riko_pjok_questions');
+            if (saved) {
+                try {
+                    questionBank = JSON.parse(saved);
+                } catch(e) {
+                    questionBank = [...DEFAULT_PJOK_QUESTIONS];
+                }
+            } else {
+                questionBank = [...DEFAULT_PJOK_QUESTIONS];
+            }
+            saveQuestionBank();
+            renderQuestionBankList();
+        }
+
+        function saveQuestionBank() {
+            localStorage.setItem('riko_pjok_questions', JSON.stringify(questionBank));
+            document.getElementById('questionCount').innerText = questionBank.length;
+        }
+
+        function resetDefaultQuestions() {
+            questionBank = [...DEFAULT_PJOK_QUESTIONS];
+            saveQuestionBank();
+            renderQuestionBankList();
+            alert("Bank Soal PJOK berhasil dikembalikan ke default!");
+        }
+
+        function renderQuestionBankList() {
+            const container = document.getElementById('questionList');
+            container.innerHTML = '';
+            
+            questionBank.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-50 border rounded-xl p-2.5 text-xs flex justify-between items-start space-x-2';
+                item.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="font-bold text-slate-800">${index + 1}. ${q.q}</p>
+                        <p class="text-indigo-600 font-semibold mt-1">Kunci: ${q.options[q.correct]}</p>
+                    </div>
+                    <button onclick="deleteQuestion(${index})" class="text-red-500 hover:text-red-700 font-bold p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteQuestion(index) {
+            if (questionBank.length <= 1) {
+                alert("Bank soal minimal harus berisi 1 soal!");
+                return;
+            }
+            questionBank.splice(index, 1);
+            saveQuestionBank();
+            renderQuestionBankList();
+        }
+
+        function addManualQuestion() {
+            const q = document.getElementById('manualQuestion').value.trim();
+            const a = document.getElementById('manualOptA').value.trim();
+            const b = document.getElementById('manualOptB').value.trim();
+            const c = document.getElementById('manualOptC').value.trim();
+            const d = document.getElementById('manualOptD').value.trim();
+            const correct = parseInt(document.getElementById('manualCorrect').value);
+            const exp = document.getElementById('manualExplanation').value.trim() || "Penjelasan materi PJOK.";
+
+            if (!q || !a || !b || !c || !d) {
+                alert("Harap isi semua kolom pertanyaan dan pilihan jawaban!");
+                return;
+            }
+
+            questionBank.push({
+                q: q,
+                options: [`A. ${a}`, `B. ${b}`, `C. ${c}`, `D. ${d}`],
+                correct: correct,
+                explanation: exp
+            });
+
+            saveQuestionBank();
+            renderQuestionBankList();
+
+            // Clear inputs
+            document.getElementById('manualQuestion').value = '';
+            document.getElementById('manualOptA').value = '';
+            document.getElementById('manualOptB').value = '';
+            document.getElementById('manualOptC').value = '';
+            document.getElementById('manualOptD').value = '';
+            document.getElementById('manualExplanation').value = '';
+
+            alert("Soal manual berhasil ditambahkan!");
+        }
+
+        /* ==========================================================================
+           2. AI GENERATOR INTEGRATION (Gemini API)
+           ========================================================================== */
+        async function generateQuestionsAI() {
+            const subject = document.getElementById('aiSubject').value;
+            const grade = document.getElementById('aiGrade').value;
+            const topic = document.getElementById('aiTopic').value;
+            const count = parseInt(document.getElementById('aiCount').value) || 5;
+
+            const btn = document.getElementById('btnGenerateAI');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Menghasilkan Soal PJOK via AI...</span>`;
+
+            const systemPrompt = `Anda adalah seorang penyusun kurikulum PJOK Sekolah Dasar yang sangat ahli. Buatlah ${count} soal pilihan ganda berkualitas tinggi untuk mata pelajaran ${subject} tingkat ${grade} dengan materi '${topic}'. Setiap soal harus memiliki 4 opsi pilihan jawaban (A, B, C, D), kunci jawaban (indeks 0-3), dan penjelasan ringkas.`;
+            
+            const userQuery = `Buatkan ${count} soal pilihan ganda PJOK SD Kelas 4 materi ${topic}. Respon WAJIB berbentuk format JSON array murni tanpa markdown lain. Contoh format output:
+[
+  {
+    "q": "Pada permainan Gobak Sodor, berlari mengejar lawan termasuk...",
+    "options": ["A. Lokomotor", "B. Non-lokomotor", "C. Manipulatif", "D. Pasif"],
+    "correct": 0,
+    "explanation": "Berlari memindahkan posisi tubuh sehingga termasuk gerak lokomotor."
+  }
+]`;
+
+            try {
+                const apiKey = ""; // Canvas runtime provides standard key
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                const data = await response.json();
+                const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (jsonText) {
+                    const generatedQuestions = JSON.parse(jsonText);
+                    if (Array.isArray(generatedQuestions) && generatedQuestions.length > 0) {
+                        questionBank = generatedQuestions;
+                        saveQuestionBank();
+                        renderQuestionBankList();
+                        alert(`Berhasil membuat ${generatedQuestions.length} soal PJOK otomatis dengan AI!`);
+                    } else {
+                        throw new Error("Format output AI tidak sesuai.");
+                    }
+                } else {
+                    throw new Error("Gagal menerima respon teks dari AI.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Gagal menghasilkan soal AI. Menggunakan bank soal default PJOK.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        /* ==========================================================================
+           3. SOUND EFFECTS GENERATOR (Web Audio API 8-Bit Synth)
+           ========================================================================== */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playCoin() {
+                this.init();
+                if(!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, this.ctx.currentTime); // B5
+                osc.frequency.setValueAtTime(1318.51, this.ctx.currentTime + 0.08); // E6
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+            playJump() {
+                this.init();
+                if(!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+            playPowerup() {
+                this.init();
+                if(!this.ctx) return;
+                const notes = [330, 392, 659, 523, 587, 784];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + (idx + 1) * 0.06);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.06);
+                    osc.stop(this.ctx.currentTime + (idx + 1) * 0.06);
+                });
+            }
+            playCorrect() {
+                this.init();
+                if(!this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + i * 0.08);
+                    osc.stop(this.ctx.currentTime + i * 0.08 + 0.2);
+                });
+            }
+            playWrong() {
+                this.init();
+                if(!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(110, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            }
+        }
+        const sfx = new SoundFX();
+
+        /* ==========================================================================
+           4. 2D PLATFORMER GAME ENGINE (Canvas)
+           ========================================================================== */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State Variables
+        let gameRunning = false;
+        let animationFrameId = null;
+
+        let score = 0;
+        let coins = 0;
+        let lives = 3;
+        let level = 1;
+
+        // Key controls state
+        const keys = {
+            left: false,
+            right: false,
+            jump: false
+        };
+
+        // Player (Riko)
+        const player = {
+            x: 50,
+            y: 300,
+            width: 32,
+            height: 44,
+            vx: 0,
+            vy: 0,
+            speed: 4.5,
+            jumpPower: -11.5,
+            grounded: false,
+            direction: 'right',
+            animFrame: 0,
+            animTimer: 0
+        };
+
+        // Level World Objects
+        let cameraX = 0;
+        let levelWidth = 2400;
+        let platforms = [];
+        let questionBlocks = [];
+        let coinItems = [];
+        let enemies = [];
+        let finishFlag = { x: 2250, y: 230, width: 30, height: 160 };
+
+        function initLevel() {
+            cameraX = 0;
+            player.x = 50;
+            player.y = 300;
+            player.vx = 0;
+            player.vy = 0;
+
+            platforms = [
+                // Ground segments
+                { x: 0, y: 390, width: 800, height: 60 },
+                { x: 900, y: 390, width: 700, height: 60 },
+                { x: 1700, y: 390, width: 800, height: 60 },
+                
+                // Floating Platforms
+                { x: 250, y: 280, width: 140, height: 24 },
+                { x: 450, y: 210, width: 120, height: 24 },
+                { x: 650, y: 290, width: 120, height: 24 },
+                
+                { x: 1000, y: 270, width: 150, height: 24 },
+                { x: 1250, y: 200, width: 140, height: 24 },
+                { x: 1450, y: 280, width: 120, height: 24 },
+                
+                { x: 1800, y: 280, width: 160, height: 24 }
+            ];
+
+            // Question Blocks
+            questionBlocks = [
+                { x: 300, y: 160, width: 32, height: 32, hit: false },
+                { x: 500, y: 110, width: 32, height: 32, hit: false },
+                { x: 1050, y: 150, width: 32, height: 32, hit: false },
+                { x: 1300, y: 90, width: 32, height: 32, hit: false },
+                { x: 1850, y: 160, width: 32, height: 32, hit: false }
+            ];
+
+            // Coins
+            coinItems = [
+                { x: 260, y: 240, width: 18, height: 18, collected: false },
+                { x: 300, y: 240, width: 18, height: 18, collected: false },
+                { x: 340, y: 240, width: 18, height: 18, collected: false },
+                { x: 670, y: 250, width: 18, height: 18, collected: false },
+                { x: 700, y: 250, width: 18, height: 18, collected: false },
+                { x: 1270, y: 160, width: 18, height: 18, collected: false },
+                { x: 1300, y: 160, width: 18, height: 18, collected: false },
+                { x: 1900, y: 240, width: 18, height: 18, collected: false }
+            ];
+
+            // Mushroom Enemies (Goomba style)
+            enemies = [
+                { x: 480, y: 360, width: 28, height: 28, vx: -1.2, minX: 420, maxX: 750, active: true },
+                { x: 1100, y: 360, width: 28, height: 28, vx: -1.5, minX: 950, maxX: 1350, active: true },
+                { x: 1500, y: 248, width: 28, height: 28, vx: 1.2, minX: 1450, maxX: 1560, active: true }
+            ];
+        }
+
+        /* ==========================================================================
+           5. GAME LOOP & RENDERING
+           ========================================================================== */
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            update();
+            render();
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // Player movement logic
+            if (keys.left) {
+                player.vx = -player.speed;
+                player.direction = 'left';
+            } else if (keys.right) {
+                player.vx = player.speed;
+                player.direction = 'right';
+            } else {
+                player.vx = 0;
+            }
+
+            if (keys.jump && player.grounded) {
+                player.vy = player.jumpPower;
+                player.grounded = false;
+                sfx.playJump();
+            }
+
+            // Apply gravity
+            player.vy += 0.55;
+
+            // Update player positions
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Boundaries check
+            if (player.x < 0) player.x = 0;
+
+            // Platform Collisions
+            player.grounded = false;
+            platforms.forEach(plat => {
+                if (
+                    player.x < plat.x + plat.width &&
+                    player.x + player.width > plat.x &&
+                    player.y + player.height >= plat.y &&
+                    player.y + player.height <= plat.y + 15 &&
+                    player.vy >= 0
+                ) {
+                    player.grounded = true;
+                    player.vy = 0;
+                    player.y = plat.y - player.height;
+                }
+            });
+
+            // Camera Tracking
+            cameraX = player.x - 200;
+            if (cameraX < 0) cameraX = 0;
+            if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width;
+
+            // Question Block Collisions (Hit from bottom)
+            questionBlocks.forEach(q => {
+                if (
+                    player.x < q.x + q.width &&
+                    player.x + player.width > q.x &&
+                    player.y <= q.y + q.height &&
+                    player.y >= q.y &&
+                    player.vy < 0
+                ) {
+                    player.vy = 2; // Bounce down
+                    if (!q.hit) {
+                        q.hit = true;
+                        triggerQuestionModal();
+                    }
+                }
+            });
+
+            // Coin Collection
+            coinItems.forEach(coin => {
+                if (!coin.collected) {
+                    if (
+                        player.x < coin.x + coin.width &&
+                        player.x + player.width > coin.x &&
+                        player.y < coin.y + coin.height &&
+                        player.y + player.height > coin.y
+                    ) {
+                        coin.collected = true;
+                        coins += 1;
+                        score += 50;
+                        updateHUD();
+                        sfx.playCoin();
+                    }
+                }
+            });
+
+            // Enemy Movement & Collisions
+            enemies.forEach(enemy => {
+                if (!enemy.active) return;
+                enemy.x += enemy.vx;
+                if (enemy.x <= enemy.minX || enemy.x >= enemy.maxX) {
+                    enemy.vx *= -1;
+                }
+
+                // Check collision with player
+                if (
+                    player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y
+                ) {
+                    // Stomp enemy if falling down on top
+                    if (player.vy > 0 && player.y + player.height < enemy.y + 15) {
+                        enemy.active = false;
+                        player.vy = -7;
+                        score += 100;
+                        updateHUD();
+                        sfx.playPowerup();
+                    } else {
+                        // Player takes damage
+                        handlePlayerHit();
+                    }
+                }
+            });
+
+            // Check pitfall death
+            if (player.y > canvas.height + 50) {
+                handlePlayerHit();
+            }
+
+            // Finish Flag Check
+            if (
+                player.x < finishFlag.x + finishFlag.width &&
+                player.x + player.width > finishFlag.x &&
+                player.y < finishFlag.y + finishFlag.height
+            ) {
+                levelComplete();
+            }
+        }
+
+        function handlePlayerHit() {
+            sfx.playWrong();
+            lives -= 1;
+            updateHUD();
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                // Respawn at safe spot
+                player.x = Math.max(50, player.x - 200);
+                player.y = 200;
+                player.vx = 0;
+                player.vy = 0;
+            }
+        }
+
+        /* ==========================================================================
+           6. DRAWING / CANVAS GRAPHICS
+           ========================================================================== */
+        function render() {
+            // Clear Background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Draw Clouds in Background
+            drawClouds();
+
+            // Draw Platforms
+            platforms.forEach(plat => {
+                // Platform Top Grass
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(plat.x, plat.y, plat.width, 8);
+                // Dirt Body
+                ctx.fillStyle = '#854d0e';
+                ctx.fillRect(plat.x, plat.y + 8, plat.width, plat.height - 8);
+                // Texture lines
+                ctx.fillStyle = '#713f12';
+                for (let x = plat.x + 10; x < plat.x + plat.width; x += 20) {
+                    ctx.fillRect(x, plat.y + 12, 10, 4);
+                }
+            });
+
+            // Draw Question Blocks
+            questionBlocks.forEach(q => {
+                if (q.hit) {
+                    ctx.fillStyle = '#94a3b8'; // Grey empty block
+                    ctx.fillRect(q.x, q.y, q.width, q.height);
+                    ctx.strokeStyle = '#475569';
+                    ctx.strokeRect(q.x, q.y, q.width, q.height);
+                } else {
+                    ctx.fillStyle = '#f59e0b'; // Gold Question Block
+                    ctx.fillRect(q.x, q.y, q.width, q.height);
+                    ctx.fillStyle = '#b45309';
+                    ctx.fillRect(q.x + 2, q.y + 2, q.width - 4, q.height - 4);
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fillRect(q.x + 4, q.y + 4, q.width - 8, q.height - 8);
+                    
+                    // Question Mark ?
+                    ctx.fillStyle = '#b45309';
+                    ctx.font = 'bold 18px "Fredoka One"';
+                    ctx.fillText('?', q.x + 10, q.y + 23);
+                }
+            });
+
+            // Draw Coins
+            coinItems.forEach(coin => {
+                if (!coin.collected) {
+                    ctx.fillStyle = '#eab308';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.width/2, coin.y + coin.height/2, coin.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fef08a';
+                    ctx.beginPath();
+                    ctx.arc(coin.x + coin.width/2 - 2, coin.y + coin.height/2 - 2, coin.width/4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw Enemies (Mushroom style)
+            enemies.forEach(e => {
+                if (!e.active) return;
+                // Cap
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(e.x + e.width/2, e.y + 12, 14, Math.PI, 0);
+                ctx.fill();
+                // White dots
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(e.x + 6, e.y + 4, 4, 4);
+                ctx.fillRect(e.x + 18, e.y + 4, 4, 4);
+                // Stem / Body
+                ctx.fillStyle = '#fde047';
+                ctx.fillRect(e.x + 6, e.y + 12, 16, 14);
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.fillRect(e.x + 9, e.y + 15, 3, 5);
+                ctx.fillRect(e.x + 16, e.y + 15, 3, 5);
+            });
+
+            // Draw Finish Flag
+            ctx.fillStyle = '#64748b'; // Pole
+            ctx.fillRect(finishFlag.x, finishFlag.y, 6, finishFlag.height);
+            ctx.fillStyle = '#ef4444'; // Red Flag
+            ctx.beginPath();
+            ctx.moveTo(finishFlag.x + 6, finishFlag.y + 10);
+            ctx.lineTo(finishFlag.x + 45, finishFlag.y + 30);
+            ctx.lineTo(finishFlag.x + 6, finishFlag.y + 50);
+            ctx.fill();
+
+            // Draw Player (Riko - Petualang)
+            drawPlayer();
+
+            ctx.restore();
+        }
+
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+            const cloudPositions = [100, 400, 800, 1200, 1600, 2000];
+            cloudPositions.forEach(cx => {
+                ctx.beginPath();
+                ctx.arc(cx, 80, 25, 0, Math.PI * 2);
+                ctx.arc(cx + 25, 70, 30, 0, Math.PI * 2);
+                ctx.arc(cx + 50, 80, 25, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function drawPlayer() {
+            const x = player.x;
+            const y = player.y;
+
+            // Red Cap
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(x + 4, y, 24, 10);
+            ctx.fillRect(player.direction === 'right' ? x + 12 : x - 2, y + 4, 20, 6);
+
+            // Head / Skin
+            ctx.fillStyle = '#fca5a5';
+            ctx.fillRect(x + 6, y + 10, 20, 12);
+
+            // Eyes
+            ctx.fillStyle = '#000';
+            const eyeX = player.direction === 'right' ? x + 20 : x + 8;
+            ctx.fillRect(eyeX, y + 13, 3, 4);
+
+            // Shirt (Blue)
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(x + 6, y + 22, 20, 12);
+
+            // Overalls / Pants (Red)
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(x + 8, y + 32, 16, 12);
+
+            // Shoes
+            ctx.fillStyle = '#451a03';
+            ctx.fillRect(x + 4, y + 40, 10, 4);
+            ctx.fillRect(x + 18, y + 40, 10, 4);
+        }
+
+        /* ==========================================================================
+           7. QUESTION MODAL LOGIC
+           ========================================================================== */
+        let currentQuestion = null;
+
+        function triggerQuestionModal() {
+            gameRunning = false; // Pause game physics
+
+            if (questionBank.length === 0) loadQuestionBank();
+            currentQuestion = questionBank[Math.floor(Math.random() * questionBank.length)];
+
+            document.getElementById('modalQuestionText').innerText = currentQuestion.q;
+            const optionsContainer = document.getElementById('modalOptions');
+            optionsContainer.innerHTML = '';
+
+            const feedback = document.getElementById('modalFeedback');
+            feedback.className = 'hidden p-3 rounded-xl text-xs sm:text-sm font-bold';
+
+            currentQuestion.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left bg-slate-100 hover:bg-amber-100 border-2 border-slate-200 hover:border-amber-400 p-3 rounded-xl text-slate-800 font-bold text-xs sm:text-sm transition flex items-center justify-between';
+                btn.innerText = optText;
+                btn.onclick = () => answerQuestion(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            const modal = document.getElementById('questionModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function answerQuestion(selectedIndex, selectedBtn) {
+            const optionsContainer = document.getElementById('modalOptions');
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const feedback = document.getElementById('modalFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedIndex === currentQuestion.correct) {
+                // Correct Answer
+                sfx.playCorrect();
+                selectedBtn.classList.remove('bg-slate-100', 'border-slate-200');
+                selectedBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
+
+                score += 200;
+                coins += 5;
+                updateHUD();
+
+                feedback.classList.add('bg-emerald-100', 'text-emerald-800', 'border', 'border-emerald-300');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> <strong>BENAR!</strong> +200 Skor & +5 Koin!<br><span class="font-normal">${currentQuestion.explanation}</span>`;
+
+                setTimeout(() => {
+                    closeQuestionModal();
+                }, 2200);
+
+            } else {
+                // Wrong Answer
+                sfx.playWrong();
+                selectedBtn.classList.remove('bg-slate-100', 'border-slate-200');
+                selectedBtn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+
+                // Highlight correct button
+                buttons[currentQuestion.correct].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
+
+                lives -= 1;
+                updateHUD();
+
+                feedback.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> <strong>KURANG TEPAT!</strong> Nyawa berkurang 1.<br><span class="font-normal">${currentQuestion.explanation}</span>`;
+
+                setTimeout(() => {
+                    closeQuestionModal();
+                    if (lives <= 0) gameOver();
+                }, 3000);
+            }
+        }
+
+        function closeQuestionModal() {
+            const modal = document.getElementById('questionModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+
+            if (lives > 0) {
+                gameRunning = true;
+                gameLoop();
+            }
+        }
+
+        /* ==========================================================================
+           8. HUD & GAME STATE CONTROLS
+           ========================================================================== */
+        function updateHUD() {
+            document.getElementById('hudScore').innerText = score;
+            document.getElementById('hudCoins').innerText = coins;
+            document.getElementById('hudLives').innerText = lives;
+            document.getElementById('hudLevel').innerText = level;
+        }
+
+        function startGame() {
+            document.getElementById('gameOverlay').classList.add('hidden');
+            score = 0;
+            coins = 0;
+            lives = 3;
+            level = 1;
+            updateHUD();
+            initLevel();
+
+            gameRunning = true;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function levelComplete() {
+            gameRunning = false;
+            sfx.playPowerup();
+            
+            const overlay = document.getElementById('gameOverlay');
+            document.getElementById('overlayTitle').innerText = "LEVEL SELESAI!";
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                level += 1;
+                initLevel();
+                updateHUD();
+                document.getElementById('overlayTitle').innerText = "MARIO MATH ADVENTURE";
+            }, 2000);
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            const overlay = document.getElementById('gameOverlay');
+            document.getElementById('overlayTitle').innerText = "GAME OVER";
+            overlay.classList.remove('hidden');
+        }
+
+        /* ==========================================================================
+           9. TEACHER DASHBOARD MODAL CONTROLS
+           ========================================================================== */
+        function openTeacherModal() {
+            gameRunning = false;
+            loadQuestionBank();
+            const modal = document.getElementById('teacherModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTeacherModal() {
+            const modal = document.getElementById('teacherModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            
+            // Resume game if overlay is hidden and player has lives
+            if (document.getElementById('gameOverlay').classList.contains('hidden') && lives > 0) {
+                gameRunning = true;
+                gameLoop();
+            }
+        }
+
+        /* ==========================================================================
+           10. EVENT LISTENERS (Keyboard & Mobile Touch)
+           ========================================================================== */
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') keys.jump = true;
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') keys.jump = false;
+        });
+
+        // Mobile Touch Button Listeners
+        const btnLeft = document.getElementById('btnTouchLeft');
+        const btnRight = document.getElementById('btnTouchRight');
+        const btnJump = document.getElementById('btnTouchJump');
+
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.left = true; });
+        btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.left = false; });
+
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.right = true; });
+        btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.right = false; });
+
+        btnJump.addEventListener('touchstart', (e) => { e.preventDefault(); keys.jump = true; });
+        btnJump.addEventListener('touchend', (e) => { e.preventDefault(); keys.jump = false; });
+
+        // Initial Load
+        window.onload = function() {
+            loadQuestionBank();
+            initLevel();
+            render();
+        };
+    </script>
+</body>
+</html>
